@@ -1,10 +1,11 @@
-package com.ivohasablog.bookstore.cache;
+package com.ivohasablog.cinema.movieservice.cache;
 
 import com.hazelcast.config.*;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.spring.cache.HazelcastCacheManager;
-import com.ivohasablog.bookstore.cache.serializable.ShoppingCartDSFactory;
+import com.ivohasablog.cinema.movieservice.cache.preloader.MovieMapLoader;
+import com.ivohasablog.cinema.movieservice.cache.serializable.MovieTheaterDSFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -22,11 +23,13 @@ public class HazelcastConfig {
     private static final String HZ_MEMBERS_SEPARATOR = ",";
 
     /** Hazelcast Maps */
-    public static final String BOOK_MAP = "bookMap";
-    public static final String SHOPPING_CART_MAP ="shoppingCartMap";
+    public static final String MOVIE_MAP = "movieMap";
 
     @Autowired
     private HazelcastProperties hzProperties;
+
+    @Autowired
+    private MovieMapLoader movieMapLoader;
 
     @Bean
     public CacheManager cacheManager() {
@@ -44,7 +47,7 @@ public class HazelcastConfig {
         config.getGroupConfig().setPassword(hzProperties.getGroup().getPassword());
 
         //Properties
-        config.getSerializationConfig().addDataSerializableFactory(1, new ShoppingCartDSFactory());
+        config.getSerializationConfig().addDataSerializableFactory(1, new MovieTheaterDSFactory());
         config.setProperty("hazelcast.logging.type", hzProperties.getLogging().getType());
         config.setProperty("hazelcast.jmx", hzProperties.getJmx());
 
@@ -59,25 +62,22 @@ public class HazelcastConfig {
         tcpIpConfig.setMembers(Arrays.asList(hzProperties.getCluster().getMembers().split(HZ_MEMBERS_SEPARATOR)));
 
         //Maps
-        config.addMapConfig(configBookMap());
-        config.addMapConfig(configShoppingCartMap());
+        config.addMapConfig(configMovieMap());
 
         return Hazelcast.newHazelcastInstance(config);
     }
 
-    private MapConfig configShoppingCartMap() {
-        MapConfig awlMapConfig = new MapConfig();
-        awlMapConfig.setName(SHOPPING_CART_MAP);
-        awlMapConfig.setEvictionPolicy(EvictionPolicy.LFU);
-        awlMapConfig.addMapIndexConfig(new MapIndexConfig("id", true));
-        return awlMapConfig;
-    }
+    private MapConfig configMovieMap() {
+        MapConfig movieMapConfig = new MapConfig();
+        movieMapConfig.setName(MOVIE_MAP);
+        movieMapConfig.setEvictionPolicy(EvictionPolicy.NONE);
+        movieMapConfig.addMapIndexConfig(new MapIndexConfig("id", false));
 
-    private MapConfig configBookMap() {
-        MapConfig awlMapConfig = new MapConfig();
-        awlMapConfig.setName(BOOK_MAP);
-        awlMapConfig.setEvictionPolicy(EvictionPolicy.LFU);
-        awlMapConfig.addMapIndexConfig(new MapIndexConfig("id", false));
-        return awlMapConfig;
+        MapStoreConfig movieStoreConfig = new MapStoreConfig();
+        movieStoreConfig.setImplementation(movieMapLoader);
+        movieStoreConfig.setEnabled(true);
+        movieMapConfig.setMapStoreConfig(movieStoreConfig);
+
+        return movieMapConfig;
     }
 }

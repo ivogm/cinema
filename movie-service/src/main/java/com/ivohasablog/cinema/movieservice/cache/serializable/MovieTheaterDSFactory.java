@@ -1,4 +1,4 @@
-package com.ivohasablog.bookstore.cache.serializable;
+package com.ivohasablog.cinema.movieservice.cache.serializable;
 
 import com.hazelcast.nio.serialization.DataSerializableFactory;
 import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
@@ -6,14 +6,14 @@ import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
 /**
  * Created by Ivo on 18.11.2017 г..
  */
-public class ShoppingCartDSFactory implements DataSerializableFactory {
+public class MovieTheaterDSFactory implements DataSerializableFactory {
     @Override
     public IdentifiedDataSerializable create(int typeId) {
         switch (typeId) {
-            case 1:
-                return new BookCartItem();
+            case MovieCacheItem.MOVIE_CACHE_ITEM_ID:
+                return new MovieCacheItem();
             case 2:
-                return new ShoppingCart();
+                return new MovieCacheItem();
             default:
                 return null;
         }

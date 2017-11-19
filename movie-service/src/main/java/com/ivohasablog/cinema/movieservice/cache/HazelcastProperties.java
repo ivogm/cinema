@@ -1,4 +1,4 @@
-package com.ivohasablog.bookstore.cache;
+package com.ivohasablog.cinema.movieservice.cache;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

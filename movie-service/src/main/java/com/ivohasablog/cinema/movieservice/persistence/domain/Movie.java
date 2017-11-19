@@ -1,6 +1,5 @@
-package com.ivohasablog.bookstore.persistence.domain;
+package com.ivohasablog.cinema.movieservice.persistence.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -18,11 +17,11 @@ public class Movie {
     private String id;
     private String title;
     private Double rating;
-    private String publishedDate;
+    private String releaseDate;
 
-    public Movie(String title, Double rating, String publishedDate) {
+    public Movie(String title, Double rating, String releaseDate) {
         this.title = title;
         this.rating = rating;
-        this.publishedDate = publishedDate;
+        this.releaseDate = releaseDate;
     }
 }
