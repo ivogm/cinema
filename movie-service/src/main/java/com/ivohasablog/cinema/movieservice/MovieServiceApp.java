@@ -1,6 +1,5 @@
 package com.ivohasablog.cinema.movieservice;
 
-import com.ivohasablog.cinema.movieservice.persistence.domain.Movie;
 import com.ivohasablog.cinema.movieservice.persistence.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -21,7 +20,7 @@ public class MovieServiceApp implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 
-		repository.deleteAll();
+		/*repository.deleteAll();
 
 		// save a couple of customers
 		repository.save(new Movie("It", 6.9, "September 15, 1990"));
@@ -35,6 +34,6 @@ public class MovieServiceApp implements CommandLineRunner{
 		for (Movie movie : repository.findAll()) {
 			System.out.println(movie.toString());
 		}
-		System.out.println();
+		System.out.println();*/
 	}
 }

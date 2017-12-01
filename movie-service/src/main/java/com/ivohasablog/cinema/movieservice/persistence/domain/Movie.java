@@ -3,8 +3,8 @@ package com.ivohasablog.cinema.movieservice.persistence.domain;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import javax.persistence.Id;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Created by Ivo on 18.11.2017 г..
@@ -12,6 +12,7 @@ import javax.persistence.Id;
 @Data
 @NoArgsConstructor
 @ToString()
+@Document
 public class Movie {
     @Id
     private String id;
