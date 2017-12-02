@@ -3,7 +3,9 @@ package com.ivohasablog.cinema.movieservice.cache;
 import com.hazelcast.config.*;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.MapLoader;
 import com.hazelcast.spring.cache.HazelcastCacheManager;
+import com.ivohasablog.cinema.movieservice.cache.preloader.HallMapLoader;
 import com.ivohasablog.cinema.movieservice.cache.preloader.MovieMapLoader;
 import com.ivohasablog.cinema.movieservice.cache.serializable.MovieTheaterDSFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +26,18 @@ public class HazelcastConfig {
 
     /** Hazelcast Maps */
     public static final String MOVIE_MAP = "movieMap";
+    public static final String HALL_MAP = "hallMap";
+    public static final String PROJECTION_MAP = "projectionMap";
+    public static final String TICKET_MAP = "seatMap";
 
     @Autowired
     private HazelcastProperties hzProperties;
 
     @Autowired
     private MovieMapLoader movieMapLoader;
+
+    @Autowired
+    private HallMapLoader hallMapLoader;
 
     @Bean
     public CacheManager cacheManager() {
@@ -62,22 +70,34 @@ public class HazelcastConfig {
         tcpIpConfig.setMembers(Arrays.asList(hzProperties.getCluster().getMembers().split(HZ_MEMBERS_SEPARATOR)));
 
         //Maps
-        config.addMapConfig(configMovieMap());
+        MapConfig movieMapConfig = configMovieMap(MOVIE_MAP, EvictionPolicy.LFU);
+        MapConfig hallMapConfig = configMovieMap(HALL_MAP, EvictionPolicy.NONE);
+        MapConfig projectionMapConfig = configMovieMap(PROJECTION_MAP, EvictionPolicy.LFU);
+        MapConfig ticketMapConfig = configMovieMap(TICKET_MAP, EvictionPolicy.LFU);
+
+        configMapStore(movieMapConfig, movieMapLoader);
+        configMapStore(hallMapConfig, hallMapLoader);
+
+        config.addMapConfig(movieMapConfig);
+        config.addMapConfig(hallMapConfig);
+        config.addMapConfig(projectionMapConfig);
+        config.addMapConfig(ticketMapConfig);
 
         return Hazelcast.newHazelcastInstance(config);
     }
 
-    private MapConfig configMovieMap() {
+    private MapConfig configMovieMap(String mapName, EvictionPolicy evictionPolicy) {
         MapConfig movieMapConfig = new MapConfig();
-        movieMapConfig.setName(MOVIE_MAP);
-        movieMapConfig.setEvictionPolicy(EvictionPolicy.NONE);
+        movieMapConfig.setName(mapName);
+        movieMapConfig.setEvictionPolicy(evictionPolicy);
         movieMapConfig.addMapIndexConfig(new MapIndexConfig("id", false));
-
-        MapStoreConfig movieStoreConfig = new MapStoreConfig();
-        movieStoreConfig.setImplementation(movieMapLoader);
-        movieStoreConfig.setEnabled(true);
-        movieMapConfig.setMapStoreConfig(movieStoreConfig);
-
         return movieMapConfig;
+    }
+
+    private void configMapStore(MapConfig mapConfig, MapLoader mapLoader) {
+        MapStoreConfig storeConfig = new MapStoreConfig();
+        storeConfig.setImplementation(mapLoader);
+        storeConfig.setEnabled(true);
+        mapConfig.setMapStoreConfig(storeConfig);
     }
 }
